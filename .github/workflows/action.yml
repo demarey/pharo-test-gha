@@ -1,0 +1,115 @@
+name: Pharo Build, Test & Export Clean Image
+
+on:
+  workflow_call:
+    inputs:
+      pharo-version:
+        description: "Single Pharo version to test"
+        required: false
+        default: "stable"
+        type: string
+
+      pharo-versions:
+        description: "JSON list of Pharo versions to test (overrides pharo-version)"
+        required: false
+        default: ""
+        type: string
+
+      export-image-name:
+        description: "Name of the clean image to export (empty = no export)"
+        required: false
+        default: ""
+        type: string
+
+      metacello-baseline:
+        description: "Metacello baseline to load"
+        required: false
+        default: "MyProject"
+        type: string
+
+      metacello-repository:
+        description: "Metacello repository URL"
+        required: false
+        default: "github://myorg/myproject/src"
+        type: string
+
+      test-packages:
+        description: "Packages to test (empty = all tests)"
+        required: false
+        default: ""
+        type: string
+
+      test-output:
+        description: "JUnit XML output file"
+        required: false
+        default: "test-results.xml"
+        type: string
+
+      test-fail-on-error:
+        description: "Fail the job if tests fail"
+        required: false
+        default: "true"
+        type: string
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      # ------------------------------------------------------------
+      # Version normalization:
+      #
+      # - If `pharo-versions` is provided (non-empty), it must be a
+      #   JSON array and is used directly.
+      #
+      # - If `pharo-versions` is empty, the workflow falls back to
+      #   `pharo-version` and wraps it into a JSON array:
+      #
+      #       ["Pharo64-11"]
+      #
+      #   This allows the matrix strategy to work uniformly whether
+      #   the caller specifies one version or many.
+      # ------------------------------------------------------------
+      matrix:
+        pharo-version: ${{ inputs.pharo-versions != '' && fromJson(inputs.pharo-versions) || fromJson(format('["{0}"]', inputs.pharo-version)) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Pharo
+        uses: pharo-project/pharo-setup-gha@v1
+        with:
+          pharo-version: ${{ matrix.pharo-version }}
+          image-name: ${{ inputs.export-image-name != '' && inputs.export-image-name || 'Pharo' }}
+
+      - name: Load project with Metacello (and save clean image)
+        run: |
+          pharo metacello \
+            baseline=${{ inputs.metacello-baseline }} \
+            repository=${{ inputs.metacello-repository }} \
+            load --save
+
+      - name: Export clean image
+        if: ${{ inputs.export-image-name != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.export-image-name }}-${{ matrix.pharo-version }}
+          path: |
+            ${{ inputs.export-image-name }}.image
+            ${{ inputs.export-image-name }}.changes
+            *.sources
+
+      - name: Run tests
+        run: |
+          pharo test \
+            --junit-xml-output ${{ inputs.test-output }} \
+            ${{ inputs.test-packages != '' && format('--packages {0}', inputs.test-packages) || '' }} \
+            ${{ inputs.test-fail-on-error == 'true' && '--fail-on-failure' || '' }}
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pharo-test-results-${{ matrix.pharo-version }}
+          path: ${{ inputs.test-output }}
