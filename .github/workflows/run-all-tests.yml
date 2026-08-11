@@ -6,9 +6,5 @@ on:
 
 jobs:
   test-single:
-    uses: ./.github/workflows/tests/test-single.yml
-
-  test-multi:
-    uses: ./.github/workflows/tests/test-multi.yml
-
+    uses: ./.github/workflows/test-single.yml
 

@@ -3,16 +3,9 @@ name: Pharo Build, Test & Export Clean Image
 on:
   workflow_call:
     inputs:
-      pharo-version:
-        description: "Single Pharo version to test"
-        required: false
-        default: "stable"
-        type: string
-
       pharo-versions:
-        description: "JSON list of Pharo versions to test (overrides pharo-version)"
-        required: false
-        default: ""
+        description: "JSON array of versions, e.g. [13] or [12, 13]"
+        required: true
         type: string
 
       export-image-name:
@@ -34,15 +27,9 @@ on:
         type: string
 
       test-packages:
-        description: "Packages to test (empty = all tests)"
+        description: "Packages to test"
         required: false
         default: ""
-        type: string
-
-      test-output:
-        description: "JUnit XML output file"
-        required: false
-        default: "test-results.xml"
         type: string
 
       test-fail-on-error:
@@ -55,36 +42,33 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
 
+    env:
+      PHARO_IMAGE_NAME: ${{ inputs.export-image-name != '' && inputs.export-image-name || 'Pharo' }}
+
     strategy:
       fail-fast: false
 
       matrix:
-        pharo-version: ${{ 
-           inputs.pharo-versions != '' 
-           && fromJson(inputs.pharo-versions) 
-           || fromJson(format('[%s]', inputs.pharo-version)) 
-         }}
-
+        pharo-version: ${{ fromJson(inputs.pharo-versions) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Pharo
-        uses: pharo-project/pharo-setup-gha@v1
+        uses: pharo-project/pharo-setup-gha@main
         with:
-          pharo-version: ${{ matrix.pharo-version }}
-          image-name: ${{ inputs.export-image-name != '' && inputs.export-image-name || 'Pharo' }}
-
+          version: ${{ matrix.pharo-version }}
+          imageName: ${{ env.PHARO_IMAGE_NAME }}
+      
       - name: Load project with Metacello (and save clean image)
         run: |
-          pharo metacello \
-            baseline=${{ inputs.metacello-baseline }} \
-            repository=${{ inputs.metacello-repository }} \
-            load --save
+          $PHARO --headless "$PHARO_IMAGE_NAME".image metacello \
+            install ${{ inputs.metacello-repository }} ${{ inputs.metacello-baseline }} \
+            --save
 
       - name: Export clean image
         if: ${{ inputs.export-image-name != '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.export-image-name }}-${{ matrix.pharo-version }}
           path: |
@@ -94,13 +78,13 @@ jobs:
 
       - name: Run tests
         run: |
-          pharo test \
-            --junit-xml-output ${{ inputs.test-output }} \
-            ${{ inputs.test-packages != '' && format('--packages {0}', inputs.test-packages) || '' }} \
+          $PHARO --headless "$PHARO_IMAGE_NAME".image test \
+            --junit-xml-output \
+            ${{ inputs.test-packages }} \
             ${{ inputs.test-fail-on-error == 'true' && '--fail-on-failure' || '' }}
 
       - name: Archive test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: pharo-test-results-${{ matrix.pharo-version }}
-          path: ${{ inputs.test-output }}
+          name: test-results-${{ matrix.pharo-version }}
+          path: ./*.xml

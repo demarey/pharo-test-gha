@@ -1,11 +1,12 @@
 name: Test Multi Version
 
 on:
+  workflow_call:
   workflow_dispatch:
 
 jobs:
   test-multi:
-    uses: ../pharo-build.yml
+    uses: ./action.yml
     with:
       pharo-versions: '[12, 13]'
       export-image-name: "TestImage"
