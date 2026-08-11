@@ -58,22 +58,13 @@ jobs:
     strategy:
       fail-fast: false
 
-      # ------------------------------------------------------------
-      # Version normalization:
-      #
-      # - If `pharo-versions` is provided (non-empty), it must be a
-      #   JSON array and is used directly.
-      #
-      # - If `pharo-versions` is empty, the workflow falls back to
-      #   `pharo-version` and wraps it into a JSON array:
-      #
-      #       ["Pharo64-11"]
-      #
-      #   This allows the matrix strategy to work uniformly whether
-      #   the caller specifies one version or many.
-      # ------------------------------------------------------------
       matrix:
-        pharo-version: ${{ inputs.pharo-versions != '' && fromJson(inputs.pharo-versions) || fromJson(format('["{0}"]', inputs.pharo-version)) }}
+        pharo-version: ${{ 
+           inputs.pharo-versions != '' 
+           && fromJson(inputs.pharo-versions) 
+           || fromJson(format('[%s]', inputs.pharo-version)) 
+         }}
+
 
     steps:
       - uses: actions/checkout@v4
