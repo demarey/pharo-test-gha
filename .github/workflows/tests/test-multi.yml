@@ -1,0 +1,36 @@
+name: Test Multi Version
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-multi:
+    uses: ../pharo-build.yml
+    with:
+      pharo-versions: '[12, 13]'
+      export-image-name: "TestImage"
+      metacello-baseline: "Soup"
+      metacello-repository: "github://pharo-contributions/Soup/src"
+
+  assert-12:
+    needs: test-multi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: TestImage-12
+      - run: |
+          test -f TestImage.image
+          test -f TestImage.changes
+
+  assert-13:
+    needs: test-multi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: TestImage-13
+      - run: |
+          test -f TestImage.image
+          test -f TestImage.changes
+

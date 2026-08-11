@@ -1,0 +1,14 @@
+name: Non-regression Test Suite
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  test-single:
+    uses: ./.github/workflows/tests/test-single.yml
+
+  test-multi:
+    uses: ./.github/workflows/tests/test-multi.yml
+
+
