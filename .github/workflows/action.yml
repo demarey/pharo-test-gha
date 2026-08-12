@@ -62,14 +62,18 @@ jobs:
       
       - name: Load project with Metacello (and save clean image)
         run: |
+          # Force numeric conversion
+          PHARO_VERSION=$(( ${{ matrix.pharo-version }} ))
+
           if [ "$PHARO_VERSION" -ge 14 ]; then
             PROJECT_NAME="${{ inputs.metacello-baseline }}"
           else
             PROJECT_NAME="BaselineOf${{ inputs.metacello-baseline }}"
           fi
+          echo "Loding project $PROJECT_NAME"
 
           $PHARO --headless "$PHARO_IMAGE_NAME".image metacello \
-            install ${{ inputs.metacello-repository }} $PROJECT_NAME \
+            install ${{ inputs.metacello-repository }} "$PROJECT_NAME" \
             --save
 
       - name: Export clean image
