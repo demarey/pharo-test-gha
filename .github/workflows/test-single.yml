@@ -12,6 +12,7 @@ jobs:
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"
       test-packages: "Soup.*"
+      test-artifact-name: "test-results-single"
 
   assert:
     needs: test-single
@@ -23,6 +24,6 @@ jobs:
           sparse-checkout-cone-mode: false
       - uses: actions/download-artifact@v7
         with:
-          name: test-results-14
+          name: test-results-single-14
       - name: Assert Test reports present
         run: ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml

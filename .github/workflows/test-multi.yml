@@ -13,6 +13,7 @@ jobs:
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"
       test-packages: "Soup.*"
+      test-artifact-name: "test-results-multi"
 
   assert-13:
     needs: test-multi
@@ -27,13 +28,17 @@ jobs:
 
       - uses: actions/download-artifact@v7
         with:
-          name: test-results-13
+          name: test-results-multi-13
+      - name: debug
+        run: ls -R
       - uses: actions/checkout@v7
         with:
           sparse-checkout: scripts/assert-xml-files.sh
           sparse-checkout-cone-mode: false
+      - name: debug
+        run: ls -R
       - name: Assert Test reports present
-        run: ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml
+        run: bash -x ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml
 
   assert-14:
     needs: test-multi
@@ -48,10 +53,14 @@ jobs:
 
       - uses: actions/download-artifact@v7
         with:
-          name: test-results-14
+          name: test-results-multi-14
+      - name: debug
+        run: ls -R
       - uses: actions/checkout@v7
         with:
           sparse-checkout: scripts/assert-xml-files.sh
           sparse-checkout-cone-mode: false
+      - name: debug
+        run: ls -R
       - name: Assert Test reports present
         run: ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml

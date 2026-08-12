@@ -13,6 +13,7 @@ jobs:
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"
       test-packages: "Soup.*"
+      test-artifact-name: "test-results-export"
 
   assert:
     needs: test
