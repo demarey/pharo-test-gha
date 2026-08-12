@@ -1,28 +1,26 @@
-name: Test Single Version
+name: Test Export
 
 on:
   workflow_call:
   workflow_dispatch:
 
 jobs:
-  test-single:
+  test:
     uses: ./.github/workflows/action.yml
     with:
       pharo-versions: "[14]"
+      export-image-name: "ExportTest"
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"
       test-packages: "Soup.*"
 
   assert:
-    needs: test-single
+    needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-        with:
-          sparse-checkout: scripts/assert-xml-files.sh
-          sparse-checkout-cone-mode: false
       - uses: actions/download-artifact@v7
         with:
-          name: test-results-14
-      - name: Assert Test reports present
-        run: ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml
+          name: ExportTest-14
+      - run: |
+          test -f ExportTest.image
+          test -f ExportTest.changes

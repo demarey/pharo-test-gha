@@ -6,32 +6,52 @@ on:
 
 jobs:
   test-multi:
-    uses: ./action.yml
+    uses: ./.github/workflows/action.yml
     with:
-      pharo-versions: '[12, 13]'
+      pharo-versions: "[13, 14]"
       export-image-name: "TestImage"
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"
-
-  assert-12:
-    needs: test-multi
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: TestImage-12
-      - run: |
-          test -f TestImage.image
-          test -f TestImage.changes
+      test-packages: "Soup.*"
 
   assert-13:
     needs: test-multi
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: TestImage-13
       - run: |
           test -f TestImage.image
           test -f TestImage.changes
 
+      - uses: actions/download-artifact@v7
+        with:
+          name: test-results-13
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/assert-xml-files.sh
+          sparse-checkout-cone-mode: false
+      - name: Assert Test reports present
+        run: ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml
+
+  assert-14:
+    needs: test-multi
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: TestImage-14
+      - run: |
+          test -f TestImage.image
+          test -f TestImage.changes
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: test-results-14
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/assert-xml-files.sh
+          sparse-checkout-cone-mode: false
+      - name: Assert Test reports present
+        run: ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml

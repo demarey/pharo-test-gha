@@ -7,4 +7,9 @@ on:
 jobs:
   test-single:
     uses: ./.github/workflows/test-single.yml
+  
+  test-export:
+    uses: ./.github/workflows/test-export.yml
 
+  test-no-export:
+    uses: ./.github/workflows/test-no-export.yml

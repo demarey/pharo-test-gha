@@ -1,0 +1,22 @@
+name: Test No Export
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test-no-export:
+    uses: ./.github/workflows/action.yml
+    with:
+      pharo-versions: "[14]"
+      metacello-baseline: "Soup"
+      metacello-repository: "github://pharo-contributions/Soup/src"
+      test-packages: "Soup.*"
+
+  assert:
+    needs: test-no-export
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure no image artifact exists
+        run: |
+          ! gh run artifacts | grep -q "TestImage-14"
