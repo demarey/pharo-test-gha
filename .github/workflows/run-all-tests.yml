@@ -8,6 +8,9 @@ jobs:
   test-single:
     uses: ./.github/workflows/test-single.yml
   
+  test-multi:
+    uses: ./.github/workflows/test-multi.yml
+  
   test-export:
     uses: ./.github/workflows/test-export.yml
 

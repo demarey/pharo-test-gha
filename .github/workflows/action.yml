@@ -62,8 +62,14 @@ jobs:
       
       - name: Load project with Metacello (and save clean image)
         run: |
+          if [ "$PHARO_VERSION" -ge 14 ]; then
+            PROJECT_NAME="${{ inputs.metacello-baseline }}"
+          else
+            PROJECT_NAME="BaselineOf${{ inputs.metacello-baseline }}"
+          fi
+
           $PHARO --headless "$PHARO_IMAGE_NAME".image metacello \
-            install ${{ inputs.metacello-repository }} ${{ inputs.metacello-baseline }} \
+            install ${{ inputs.metacello-repository }} $PROJECT_NAME \
             --save
 
       - name: Export clean image
