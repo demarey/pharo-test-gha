@@ -1,0 +1,42 @@
+name: Assert XML files
+description: Assert that an artifact directory contains exactly the expected XML files
+
+inputs:
+  path:
+    description: Directory containing the files
+    required: true
+  expected:
+    description: Space-separated list of expected XML filenames
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Assert XML files
+      shell: bash
+      env:
+        EXPECTED: ${{ inputs.expected }}
+      run: |
+        expected=($EXPECTED)
+
+        mapfile -t actual < <(
+          find "${{ inputs.path }}" -type f -name '*.xml' -printf '%f\n' | sort
+        )
+
+        mapfile -t expected_sorted < <(
+          printf '%s\n' "${expected[@]}" | sort
+        )
+
+        echo "Expected:"
+        printf '  %s\n' "${expected_sorted[@]}"
+
+        echo "Found:"
+        printf '  %s\n' "${actual[@]}"
+
+        if [[ "${#actual[@]}" -ne "${#expected_sorted[@]}" ]] ||
+           [[ "$(printf '%s\n' "${actual[@]}")" != "$(printf '%s\n' "${expected_sorted[@]}")" ]]; then
+          echo "::error::XML files do not match expected files"
+          exit 1
+        fi
+
+        echo "XML files match."

@@ -26,19 +26,17 @@ jobs:
           test -f TestImage.image
           test -f TestImage.changes
 
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github
       - uses: actions/download-artifact@v7
         with:
           name: test-results-multi-13
-      - name: debug
-        run: ls -R
-      - uses: actions/checkout@v7
+      - uses: ./.github/actions/assert-xml-files
+        name: Assert Test reports present
         with:
-          sparse-checkout: scripts/assert-xml-files.sh
-          sparse-checkout-cone-mode: false
-      - name: debug
-        run: ls -R
-      - name: Assert Test reports present
-        run: bash -x ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml
+          path: .
+          expected: "Soup-Tests-Core-Test.xml"
 
   assert-14:
     needs: test-multi
@@ -51,16 +49,14 @@ jobs:
           test -f TestImage.image
           test -f TestImage.changes
 
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github
       - uses: actions/download-artifact@v7
         with:
           name: test-results-multi-14
-      - name: debug
-        run: ls -R
-      - uses: actions/checkout@v7
+      - uses: ./.github/actions/assert-xml-files
+        name: Assert Test reports present
         with:
-          sparse-checkout: scripts/assert-xml-files.sh
-          sparse-checkout-cone-mode: false
-      - name: debug
-        run: ls -R
-      - name: Assert Test reports present
-        run: ./scripts/assert-xml-files.sh . Soup-Tests-Core-Test.xml
+          path: .
+          expected: "Soup-Tests-Core-Test.xml"
