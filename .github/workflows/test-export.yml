@@ -11,7 +11,7 @@ jobs:
       pharo-version: "14"
       export-image-name: "ExportTest"
       metacello-baseline: "Soup"
-      metacello-repository: "github://pharo-contributions/Soup/src"
+      metacello-repository: "src"
       test-packages: "Soup.*"
       test-artifact-name: "test-results-export"
 

@@ -15,7 +15,7 @@ jobs:
       pharo-version: ${{ matrix.pharo-version }}
       export-image-name: "TestImage"
       metacello-baseline: "Soup"
-      metacello-repository: "github://pharo-contributions/Soup/src"
+      metacello-repository: "src"
       test-packages: "Soup.*"
       test-artifact-name: "test-results-multi"
 

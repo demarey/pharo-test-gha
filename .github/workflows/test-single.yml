@@ -14,7 +14,7 @@ jobs:
     with:
       pharo-version: "14"
       metacello-baseline: "Soup"
-      metacello-repository: "github://pharo-contributions/Soup/src"
+      metacello-repository: "src"
       test-packages: "Soup.*"
       test-artifact-name: "test-results-single"
 

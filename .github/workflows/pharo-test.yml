@@ -21,9 +21,9 @@ on:
         type: string
 
       metacello-repository:
-        description: "Metacello repository URL"
+        description: "Metacello repository path (local path relative to checkout, e.g. 'src')"
         required: false
-        default: "github://myorg/myproject/src"
+        default: "src"
         type: string
 
       test-packages:
@@ -56,6 +56,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - name: Setup Pharo
         uses: pharo-project/pharo-setup-gha@main
@@ -73,10 +75,13 @@ jobs:
           else
             PROJECT_NAME="BaselineOf${{ inputs.metacello-baseline }}"
           fi
-          echo "Loding project $PROJECT_NAME"
+          echo "Loading project $PROJECT_NAME"
 
+          # Use local checkout instead of remote repository
+          REPO_PATH="${{ github.workspace }}/${{ inputs.metacello-repository }}"
+          
           $PHARO --headless "$PHARO_IMAGE_NAME".image metacello \
-            install ${{ inputs.metacello-repository }} "$PROJECT_NAME" \
+            install "gitlocal:///${REPO_PATH}" "$PROJECT_NAME" \
             --save
 
       - name: Export clean image
