@@ -6,9 +6,9 @@ on:
 
 jobs:
   test:
-    uses: ./.github/workflows/action.yml
+    uses: ./.github/workflows/pharo-test.yml
     with:
-      pharo-versions: "[14]"
+      pharo-version: "14"
       export-image-name: "ExportTest"
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"

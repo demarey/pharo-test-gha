@@ -3,8 +3,8 @@ name: Pharo CI
 on:
   workflow_call:
     inputs:
-      pharo-versions:
-        description: "JSON array of versions, e.g. [13] or [12, 13]"
+      pharo-version:
+        description: "Pharo version to test, e.g. 11, 12, or 13"
         required: true
         type: string
 
@@ -54,22 +54,19 @@ jobs:
     strategy:
       fail-fast: false
 
-      matrix:
-        pharo-version: ${{ fromJson(inputs.pharo-versions) }}
-
     steps:
       - uses: actions/checkout@v7
 
       - name: Setup Pharo
         uses: pharo-project/pharo-setup-gha@main
         with:
-          version: ${{ matrix.pharo-version }}
+          version: ${{ inputs.pharo-version }}
           imageName: ${{ env.PHARO_IMAGE_NAME }}
       
       - name: Load project with Metacello (and save clean image)
         run: |
           # Force numeric conversion
-          PHARO_VERSION=$(( ${{ matrix.pharo-version }} ))
+          PHARO_VERSION=$(( ${{ inputs.pharo-version }} ))
 
           if [ "$PHARO_VERSION" -ge 14 ]; then
             PROJECT_NAME="${{ inputs.metacello-baseline }}"
@@ -86,7 +83,7 @@ jobs:
         if: ${{ inputs.export-image-name != '' }}
         uses: actions/upload-artifact@v7
         with:
-          name: ${{ inputs.export-image-name }}-${{ matrix.pharo-version }}
+          name: ${{ inputs.export-image-name }}-${{ inputs.pharo-version }}
           path: |
             ${{ inputs.export-image-name }}.image
             ${{ inputs.export-image-name }}.changes
@@ -103,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: ${{ inputs.test-artifact-name }}-${{ matrix.pharo-version }}
+          name: ${{ inputs.test-artifact-name }}-${{ inputs.pharo-version }}
           path: ./*.xml
 
       - name: Publish unified report

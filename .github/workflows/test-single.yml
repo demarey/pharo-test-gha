@@ -10,9 +10,9 @@ permissions:
 
 jobs:
   test-single:
-    uses: ./.github/workflows/action.yml
+    uses: ./.github/workflows/pharo-test.yml
     with:
-      pharo-versions: "[14]"
+      pharo-version: "14"
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"
       test-packages: "Soup.*"

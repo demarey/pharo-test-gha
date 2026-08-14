@@ -6,9 +6,13 @@ on:
 
 jobs:
   test-multi:
-    uses: ./.github/workflows/action.yml
+    strategy:
+      matrix:
+        pharo-version: [13, 14]
+    
+    uses: ./.github/workflows/pharo-test.yml
     with:
-      pharo-versions: "[13, 14]"
+      pharo-version: ${{ matrix.pharo-version }}
       export-image-name: "TestImage"
       metacello-baseline: "Soup"
       metacello-repository: "github://pharo-contributions/Soup/src"
