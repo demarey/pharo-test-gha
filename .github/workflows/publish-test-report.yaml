@@ -6,10 +6,6 @@ on:
     types:
       - completed
 
-permissions:
-  checks: write
-  contents: read
-
 jobs:
   publish:
     runs-on: ubuntu-latest

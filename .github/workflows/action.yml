@@ -44,7 +44,6 @@ on:
         type: string
         default: "test-results"
 
-
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -106,3 +105,8 @@ jobs:
         with:
           name: ${{ inputs.test-artifact-name }}-${{ matrix.pharo-version }}
           path: ./*.xml
+
+      - name: Publish unified report
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "**/*.xml"

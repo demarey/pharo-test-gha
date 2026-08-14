@@ -4,6 +4,10 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  checks: write
+  contents: read
+
 jobs:
   test-single:
     uses: ./.github/workflows/action.yml
