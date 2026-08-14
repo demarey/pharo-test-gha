@@ -1,0 +1,24 @@
+name: Publish Pharo Test Report
+
+on:
+  workflow_run:
+    workflows: ["Pharo CI"]
+    types:
+      - completed
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Publish unified report
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "**/*.xml"

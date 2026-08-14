@@ -1,4 +1,4 @@
-name: Pharo Build, Test & Export Clean Image
+name: Pharo CI
 
 on:
   workflow_call:
@@ -106,9 +106,3 @@ jobs:
         with:
           name: ${{ inputs.test-artifact-name }}-${{ matrix.pharo-version }}
           path: ./*.xml
-
-      - name: Publish results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
-        with:
-          files: ./*.xml
