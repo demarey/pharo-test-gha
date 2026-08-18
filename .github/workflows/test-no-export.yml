@@ -13,6 +13,7 @@ jobs:
       metacello-repository: "src"
       test-packages: "Soup.*"
       test-artifact-name: "test-results-no-export"
+      checkout-repository: "demarey/Soup"
 
   assert:
     needs: test-no-export

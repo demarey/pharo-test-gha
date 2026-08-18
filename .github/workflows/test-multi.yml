@@ -18,6 +18,7 @@ jobs:
       metacello-repository: "src"
       test-packages: "Soup.*"
       test-artifact-name: "test-results-multi"
+      checkout-repository: "demarey/Soup"
 
   assert-13:
     needs: test-multi

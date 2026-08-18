@@ -17,6 +17,7 @@ jobs:
       metacello-repository: "src"
       test-packages: "Soup.*"
       test-artifact-name: "test-results-single"
+      checkout-repository: "demarey/Soup"
 
   assert:
     needs: test-single

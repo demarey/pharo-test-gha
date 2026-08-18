@@ -44,6 +44,12 @@ on:
         type: string
         default: "test-results"
 
+      checkout-repository:
+        description: "Owner/repo to checkout for the project under test (e.g. 'demarey/Soup'). Empty = checkout the calling repo"
+        required: false
+        type: string
+        default: ""
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -55,8 +61,20 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Resolve default branch for checkout
+        id: resolve-branch
+        if: inputs.checkout-repository != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ inputs.checkout-repository }}
+        run: |
+          DEFAULT_BRANCH=$(gh api "repos/$REPO" --jq .default_branch)
+          echo "branch=$DEFAULT_BRANCH" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v7
         with:
+          repository: ${{ inputs.checkout-repository != '' && inputs.checkout-repository || github.repository }}
+          ref: ${{ steps.resolve-branch.outputs.branch || github.sha }}
           fetch-depth: 0
 
       - name: Setup Pharo
