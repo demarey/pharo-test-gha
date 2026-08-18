@@ -187,22 +187,28 @@ jobs:
                   t = ms(c.get("time"))
                   err = c.find("error")
                   fail = c.find("failure")
-                  if err is not None:
-                      mark = "!"
-                      msg = err.get("message", "")
-                      color = RED
-                  elif fail is not None:
-                      mark = "x"
-                      msg = fail.get("message", "")
-                      color = ORANGE
+                  node = err if err is not None else fail
+
+                  if node is not None:
+                      if err is not None:
+                          mark, color = "!", RED
+                      else:
+                          mark, color = "x", ORANGE
+                      msg = node.get("message", "") or ""
+                      one = msg.splitlines()[0] if msg else ""
+                      body = one
+                      text = (node.text or "").strip()
+                      if text:
+                          body += ("\n" if one else "") + text
+                      title = f" {color}{mark} #{c.get('name')} ({t}ms){RESET}"
+                      if one:
+                          title += f"  {color}{one}{RESET}"
+                      print(f"::group::{title}")
+                      print(f"{color}{body}{RESET}")
+                      print("::endgroup::")
                   else:
-                      mark = "\u2713"
-                      msg = None
-                      color = GREEN
-                  line = f" {color}{mark} #{c.get('name')} ({t}ms){RESET}"
-                  print(line)
-                  if msg:
-                      print(f"   {color}{msg}{RESET}")
+                      mark, color = "\u2713", GREEN
+                      print(f" {color}{mark} #{c.get('name')} ({t}ms){RESET}")
               print()
 
           print(f"  Executed {total} Tests with {failed} Failures and {errored} Errors in {total_time:.2f}s.")
