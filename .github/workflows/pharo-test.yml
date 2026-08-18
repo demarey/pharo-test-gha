@@ -119,6 +119,95 @@ jobs:
             ${{ inputs.test-packages }} \
             ${{ inputs.test-fail-on-error == 'true' && '--fail-on-failure' || '' }}
 
+      - name: Print test summary
+        if: always()
+        shell: bash
+        env:
+          SUMMARY_TITLE: Pharo ${{ inputs.pharo-version }}
+        run: |
+          python3 - "$SUMMARY_TITLE" <<'PY'
+          import glob, os, sys, xml.etree.ElementTree as ET
+          from collections import OrderedDict
+
+          title = sys.argv[1]
+          suites = OrderedDict()
+          total = failed = errored = 0
+          total_time = 0.0
+
+          for path in sorted(glob.glob("*.xml")):
+              try:
+                  root = ET.parse(path).getroot()
+              except Exception as e:
+                  print(f"** could not parse {path}: {e}", file=sys.stderr)
+                  continue
+              for suite in root.iter("testsuite"):
+                  name = suite.get("name") or os.path.basename(path)
+                  cases = suites.setdefault(name, [])
+                  for tc in suite.findall("testcase"):
+                      cases.append(tc)
+
+          def ms(sec):
+              try:
+                  return int(round(float(sec or 0) * 1000))
+              except (TypeError, ValueError):
+                  return 0
+
+          for suite, cases in suites.items():
+              total += len(cases)
+              t = sum(ms(c.get("time")) for c in cases) / 1000.0
+              total_time += t
+              for c in cases:
+                  if c.find("error") is not None:
+                      errored += 1
+                  elif c.find("failure") is not None:
+                      failed += 1
+
+          def bar(s):
+              return "# " + s.ljust(46) + " #"
+
+          print("#" * 50)
+          print(bar(title))
+          print(bar(f"{total} Tests with {failed} Failures and {errored} Errors in {total_time:.2f}s"))
+          print("#" * 50)
+          print()
+          if failed or errored:
+              print(f"({total - failed - errored} tests passed, {failed + errored} failed)")
+          else:
+              print(f"({total} tests passed)")
+          print()
+
+          GREEN = "\033[32m"
+          RED = "\033[31m"
+          ORANGE = "\033[38;5;208m"
+          RESET = "\033[0m"
+
+          for suite, cases in suites.items():
+              print(suite)
+              for c in cases:
+                  t = ms(c.get("time"))
+                  err = c.find("error")
+                  fail = c.find("failure")
+                  if err is not None:
+                      mark = "!"
+                      msg = err.get("message", "")
+                      color = RED
+                  elif fail is not None:
+                      mark = "x"
+                      msg = fail.get("message", "")
+                      color = ORANGE
+                  else:
+                      mark = "\u2713"
+                      msg = None
+                      color = GREEN
+                  line = f" {color}{mark} #{c.get('name')} ({t}ms){RESET}"
+                  print(line)
+                  if msg:
+                      print(f"   {color}{msg}{RESET}")
+              print()
+
+          print(f"  Executed {total} Tests with {failed} Failures and {errored} Errors in {total_time:.2f}s.")
+          PY
+
       - name: Archive test results
         uses: actions/upload-artifact@v7
         if: always()
