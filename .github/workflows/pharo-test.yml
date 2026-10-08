@@ -83,7 +83,7 @@ jobs:
           version: ${{ inputs.pharo-version }}
           imageName: ${{ env.PHARO_IMAGE_NAME }}
       
-      - name: Load project with Metacello (and save clean image)
+      - name: Load project with Metacello
         run: |
           # Force numeric conversion
           PHARO_VERSION=$(( ${{ inputs.pharo-version }} ))
@@ -97,10 +97,9 @@ jobs:
 
           # Use local checkout instead of remote repository
           REPO_PATH="${{ github.workspace }}/${{ inputs.metacello-repository }}"
-          
+
           $PHARO --headless "$PHARO_IMAGE_NAME".image metacello \
-            install "gitlocal:///${REPO_PATH}" "$PROJECT_NAME" \
-            --save
+            install "gitlocal:///${REPO_PATH}" "$PROJECT_NAME"
 
       - name: Export clean image
         if: ${{ inputs.export-image-name != '' }}
